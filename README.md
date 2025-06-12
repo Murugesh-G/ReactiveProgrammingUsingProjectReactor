@@ -1,6 +1,2 @@
-# reactive-programming-using-reactor
+# Reactive Programming Using Project Reactor
 This project has the necessary code for the reactive programming course using Project Reactor
-
-## Swagger-UI
-
--   Check the following [link](http://localhost:8080/movies/swagger-ui.html) for swagger.
