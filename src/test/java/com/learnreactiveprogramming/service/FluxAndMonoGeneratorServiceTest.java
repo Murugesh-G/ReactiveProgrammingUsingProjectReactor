@@ -111,10 +111,49 @@ public class FluxAndMonoGeneratorServiceTest {
 
         var mergeFlux = fluxAndMonoGeneratorService.explore_merge();
         StepVerifier.create(mergeFlux)
-                //.expectNext(List.of("A", "L", "E", "X"))
-                //   .expectNextCount(9)
                 .expectNext("A", "D", "B", "E", "C", "F")
                 .verifyComplete();
     }
 
+    @Test
+    void explore_mergeSequential() {
+        var mergeSeqFlux = fluxAndMonoGeneratorService.explore_mergeSequential();
+        StepVerifier.create(mergeSeqFlux)
+                .expectNext("A", "B", "C", "D", "E", "F")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_zip() {
+        var mergeZipFlux = fluxAndMonoGeneratorService.explore_zip();
+        StepVerifier.create(mergeZipFlux)
+                .expectNext("AD", "BE", "CF")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_zip_1() {
+        var mergeZipTouplesFlux = fluxAndMonoGeneratorService.explore_zip_1();
+        StepVerifier.create(mergeZipTouplesFlux)
+                .expectNext("AD14", "BE25", "CF36")
+                .verifyComplete();
+    }
+
+    @Test
+    void exception_flux() {
+        var value = fluxAndMonoGeneratorService.exception_flux();
+
+        StepVerifier.create(value)
+                .expectNext("A", "B", "C")
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void explore_OnErrorReturn() {
+        var value = fluxAndMonoGeneratorService.explore_OnErrorReturn();
+        StepVerifier.create(value)
+                .expectNext("A", "B", "C", "D")
+                .verifyComplete();
+    }
 }
