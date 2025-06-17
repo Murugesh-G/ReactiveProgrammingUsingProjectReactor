@@ -1,5 +1,7 @@
 package com.learnreactiveprogramming.service;
 
+import com.learnreactiveprogramming.exception.ReactorException;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
+@Slf4j
 public class FluxAndMonoGeneratorService {
     public static void main(String[] args) {
         FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
@@ -225,4 +228,66 @@ public class FluxAndMonoGeneratorService {
                 .concatWith(Flux.error(new IllegalArgumentException(("Exception occurred"))))
                 .onErrorReturn("D").log();
     }
+
+    public Flux<String> explore_OnErrorResume(Exception e) {
+        var recoveryFlux = Flux.just("D", "E", "F");
+        return Flux.just("A", "B", "C")
+                .concatWith(Flux.error(e))
+                .onErrorResume(throwable -> {
+                    log.error("Exception is ", e);
+                    if (e instanceof IllegalStateException)
+                        return recoveryFlux;
+                    else
+                        return Flux.error(e);
+                })
+                .log();
+
+    }
+
+    public Flux<String> explore_OnErrorContinue() {
+        return Flux.just("A", "B", "C")
+                .map(name -> {
+                    if (name.equals("B"))
+                        throw new IllegalStateException("Exception Occurred");
+                    return name;
+                })
+                .onErrorContinue((throwable, o) -> {
+                    log.error("Exception is ", throwable);
+                    log.info("name is {}", o);
+                })
+                .log();
+    }
+
+    public Flux<String> explore_OnErrorMap() {
+        return Flux.just("A", "B", "C")
+                .map(name -> {
+                    if (name.equals("B"))
+                        throw new IllegalStateException("Exception Occurred");
+                    return name;
+                })
+                .onErrorMap(throwable -> {
+                    log.error("Exception is ", throwable);
+                    return new ReactorException(throwable, throwable.getMessage());
+                })
+                .log();
+    }
+
+    public Flux<String> explore_doOnError() {
+        return Flux.just("A", "B", "C")
+                .concatWith(Flux.error(new IllegalStateException("Exception Occurred")))
+                .doOnError(throwable -> {
+                    log.error("Exception is ", throwable);
+                })
+                .log();
+    }
+
+    public Mono<Object> explore_Mono_OnErrorReturn(){
+        return Mono.just("A")
+                .map(value->{
+                    throw new RuntimeException("Exception Occurred");
+                })
+                .onErrorReturn("abc")
+                .log();
+    }
+
 }

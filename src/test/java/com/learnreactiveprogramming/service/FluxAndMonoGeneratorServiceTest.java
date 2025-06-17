@@ -1,6 +1,8 @@
 package com.learnreactiveprogramming.service;
 
+import com.learnreactiveprogramming.exception.ReactorException;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -154,6 +156,50 @@ public class FluxAndMonoGeneratorServiceTest {
         var value = fluxAndMonoGeneratorService.explore_OnErrorReturn();
         StepVerifier.create(value)
                 .expectNext("A", "B", "C", "D")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_OnErrorResume() {
+        var e = new RuntimeException("Not a valid State");
+        var value = fluxAndMonoGeneratorService.explore_OnErrorResume(e);
+        StepVerifier.create(value)
+                .expectNext("A", "B", "C")
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void explore_OnErrorContinue() {
+        var value = fluxAndMonoGeneratorService.explore_OnErrorContinue();
+        StepVerifier.create(value)
+                .expectNext("A", "C")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_OnErrorMap() {
+        var value = fluxAndMonoGeneratorService.explore_OnErrorMap();
+        StepVerifier.create(value)
+                .expectNext("A")
+                .expectError(ReactorException.class)
+                .verify();
+    }
+
+    @Test
+    void explore_doOnError() {
+        var value = fluxAndMonoGeneratorService.explore_doOnError();
+        StepVerifier.create(value)
+                .expectNext("A", "B", "C")
+                .expectError(IllegalStateException.class)
+                .verify();
+    }
+
+    @Test
+    void explore_Mono_OnErrorReturn() {
+        var value = fluxAndMonoGeneratorService.explore_Mono_OnErrorReturn();
+        StepVerifier.create(value)
+                .expectNext("abc")
                 .verifyComplete();
     }
 }
